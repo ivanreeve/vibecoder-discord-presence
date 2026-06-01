@@ -1,0 +1,70 @@
+/** Shared shapes used across the tool. */
+
+export interface PresenceButton {
+  label: string;
+  url: string;
+}
+
+export interface ImageSlot {
+  /** Discord asset key (uploaded in the Developer Portal), may contain placeholders. */
+  key: string;
+  /** Hover tooltip, may contain placeholders. */
+  text: string;
+}
+
+/** A theme is a bundle of slot templates + which image assets to use. */
+export interface Theme {
+  details: string;
+  state: string;
+  largeImage: ImageSlot;
+  smallImage: ImageSlot;
+  timer: boolean;
+  buttons: PresenceButton[];
+}
+
+export type ThemeName = 'minimal' | 'developer' | 'focus' | 'playful' | 'custom';
+
+/** The user's config file: pick a theme, optionally override slots. */
+export interface UserConfig {
+  theme: ThemeName;
+  overrides?: Partial<Theme>;
+}
+
+/** One live Claude Code session, written by the hook provider. */
+export interface SessionMarker {
+  id: string;
+  startedAt: number; // epoch ms
+  heartbeat: number; // epoch ms
+  project?: string;
+  branch?: string;
+  model?: string;
+  activity?: string;
+  file?: string;
+  tokens?: number;
+  cost?: number;
+}
+
+/** Live sessions merged into a single view the daemon renders. */
+export interface AggregatedState {
+  sessionCount: number;
+  startedAt: number; // earliest start across live sessions
+  project?: string;
+  branch?: string;
+  model?: string;
+  activity?: string;
+  file?: string;
+  tokens?: number;
+  cost?: number;
+}
+
+/** What the Discord layer sends, mapped onto Discord's fixed slots. */
+export interface PresencePayload {
+  details?: string;
+  state?: string;
+  largeImageKey?: string;
+  largeImageText?: string;
+  smallImageKey?: string;
+  smallImageText?: string;
+  startTimestamp?: number;
+  buttons?: PresenceButton[];
+}
