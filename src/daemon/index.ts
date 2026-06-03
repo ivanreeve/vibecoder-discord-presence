@@ -56,6 +56,28 @@ export async function startDaemon(_args: string[] = []): Promise<void> {
   process.once('SIGTERM', () => void shutdown().then(() => process.exit(0)));
   process.on('exit', () => releaseLock()); // last-ditch synchronous cleanup
 
+  // Backstop: the discord-rpc IPC transport can let a socket 'error' (rejected
+  // handshake, ECONNRESET) go unhandled during the connect window before our
+  // own listener is attached — that would crash the daemon. A background
+  // presence daemon must survive a flaky Discord connection, so swallow known
+  // connection errors and let the loop reconnect. Anything else is a real
+  // fault: shut down cleanly rather than keep running in a bad state.
+  const RECOVERABLE = new Set([
+    'ECONNRESET',
+    'EPIPE',
+    'ECONNREFUSED',
+    'ENOENT',
+    'EBADF',
+    'ERR_STREAM_DESTROYED',
+  ]);
+  process.on('uncaughtException', (err) => {
+    if (RECOVERABLE.has((err as NodeJS.ErrnoException).code ?? '')) return;
+    void shutdown().finally(() => process.exit(1));
+  });
+  process.on('unhandledRejection', () => {
+    // In-flight RPC rejections are already handled by the Discord layer.
+  });
+
   let idleSince: number | null = null;
   while (running) {
     const now = Date.now();

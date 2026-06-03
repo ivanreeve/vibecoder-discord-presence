@@ -10,6 +10,32 @@
 import { Client, type SetActivity } from '@xhayper/discord-rpc';
 import type { PresencePayload } from '../types';
 
+/**
+ * How long to wait for a connection handshake before giving up. Crucial: if
+ * Discord is reachable but never completes the handshake (e.g. a bad app id),
+ * the library's connect() can hang indefinitely — and since that pending await
+ * may be the only thing on the event loop, the daemon would otherwise drain and
+ * exit. This bounded timer both fails fast and keeps the loop alive.
+ */
+const CONNECT_TIMEOUT_MS = 10_000;
+
+/** Reject if `p` doesn't settle within `ms`. The timer keeps the loop alive. */
+function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    p.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e: unknown) => {
+        clearTimeout(timer);
+        reject(e instanceof Error ? e : new Error(String(e)));
+      },
+    );
+  });
+}
+
 function toSetActivity(p: PresencePayload): SetActivity {
   return {
     details: p.details,
@@ -57,12 +83,33 @@ export class DiscordPresence {
       client.on('disconnected', () => {
         this.connected = false;
       });
-      await client.connect();
+      try {
+        await withTimeout(client.connect(), CONNECT_TIMEOUT_MS, 'discord connect');
+      } catch (err) {
+        // Tear down the half-open client so its socket/timers don't linger.
+        try {
+          await client.destroy();
+        } catch {
+          // ignore
+        }
+        throw err;
+      }
+      // The IPC transport doesn't keep a persistent 'error' listener on its
+      // socket, so a later socket error (e.g. ECONNRESET when Discord quits)
+      // would crash the process. Attach one; the next tick reconnects.
+      const transportSocket = (
+        client.transport as unknown as {
+          socket?: { on(event: 'error', cb: (err: unknown) => void): void };
+        }
+      ).socket;
+      transportSocket?.on('error', () => {
+        this.connected = false;
+      });
       this.client = client;
       this.connected = true;
       return true;
     } catch {
-      this.connected = false; // Discord not running — try again next tick
+      this.connected = false; // Discord down / unreachable — try again next tick
       return false;
     } finally {
       this.connecting = false;
