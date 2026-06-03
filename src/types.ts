@@ -42,6 +42,8 @@ export type ActivityState =
 export interface UserConfig {
   theme: ThemeName;
   overrides?: Partial<Theme>;
+  /** Override the Discord application id (defaults to the shared "vibecoder" app). */
+  clientId?: string;
 }
 
 /** One live Claude Code session, written by the hook provider. */

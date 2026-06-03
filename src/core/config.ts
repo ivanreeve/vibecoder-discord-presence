@@ -2,12 +2,16 @@
  * Config loading and resolution.
  *
  * Reads config.json, resolves the active theme from THEMES, applies the user's
- * `overrides` on top, and validates the result. Falls back to DEFAULT_CONFIG
- * (the privacy-safe `minimal` theme) when no config exists or it's invalid.
+ * `overrides` on top, and resolves the Discord application (client) id. Anything
+ * missing or invalid falls back to DEFAULT_CONFIG (the privacy-safe `minimal`
+ * theme) so the daemon always has something sane to render.
  *
- * TODO: implement loadConfig / validate / merge.
+ * Overrides are merged shallowly: providing `largeImage` in overrides replaces
+ * the whole slot, it does not deep-merge individual fields. That keeps the model
+ * obvious — a key you set wins outright.
  */
-import { DEFAULT_THEME } from '../themes/index';
+import { readFileSync } from 'node:fs';
+import { DEFAULT_THEME, THEMES } from '../themes/index';
 import type { Theme, UserConfig } from '../types';
 
 /** What a brand-new install runs with until the user changes anything. */
@@ -16,7 +20,52 @@ export const DEFAULT_CONFIG: UserConfig = {
   overrides: {},
 };
 
-/** Resolve the effective theme (theme + overrides) from a config file. */
-export function loadConfig(_configPath: string): Theme {
-  throw new Error('loadConfig: not implemented yet');
+/**
+ * Discord application id the presence is published under. The image asset keys
+ * the themes reference (`logo`, `status-editing`, …) live on this application.
+ *
+ * NOTE: placeholder until the shared "vibecoder" Discord application is
+ * registered in the Developer Portal. Override per-machine with the
+ * VDP_DISCORD_CLIENT_ID env var or a `clientId` field in config.json.
+ */
+export const DEFAULT_CLIENT_ID = '';
+
+function stripBom(s: string): string {
+  return s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;
+}
+
+/** Read and shallow-validate config.json, falling back to defaults. */
+export function readUserConfig(configPath: string): UserConfig {
+  try {
+    const raw = stripBom(readFileSync(configPath, 'utf8'));
+    const parsed = JSON.parse(raw) as Partial<UserConfig>;
+    if (typeof parsed !== 'object' || parsed === null) return DEFAULT_CONFIG;
+    return {
+      theme:
+        typeof parsed.theme === 'string'
+          ? (parsed.theme as UserConfig['theme'])
+          : DEFAULT_CONFIG.theme,
+      overrides:
+        typeof parsed.overrides === 'object' && parsed.overrides !== null ? parsed.overrides : {},
+      clientId: typeof parsed.clientId === 'string' ? parsed.clientId : undefined,
+    };
+  } catch {
+    return DEFAULT_CONFIG;
+  }
+}
+
+/** Resolve the effective theme (base theme + overrides) from a parsed config. */
+export function resolveTheme(config: UserConfig): Theme {
+  const base = THEMES[config.theme] ?? THEMES[DEFAULT_THEME];
+  return { ...base, ...(config.overrides ?? {}) } as Theme;
+}
+
+/** Resolve which Discord application id to publish under (env > config > default). */
+export function resolveClientId(config: UserConfig): string {
+  return process.env.VDP_DISCORD_CLIENT_ID || config.clientId || DEFAULT_CLIENT_ID;
+}
+
+/** Convenience: resolve the effective theme straight from a config file path. */
+export function loadConfig(configPath: string): Theme {
+  return resolveTheme(readUserConfig(configPath));
 }
