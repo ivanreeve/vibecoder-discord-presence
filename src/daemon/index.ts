@@ -13,8 +13,8 @@
  * to; health is surfaced through the status file (see core/daemon-state) which
  * `vdp status` reads.
  *
- * Note: model/branch/tokens enrichment from the transcript isn't wired up yet —
- * those tokens simply collapse in rendering until a later step adds it.
+ * Facts the hook can't cheaply know (model, branch, tokens) are enriched here
+ * from the current session's transcript before rendering.
  */
 import {
   acquireLock,
@@ -25,6 +25,7 @@ import {
 import { configPath } from '../core/paths';
 import { readUserConfig, resolveClientId, resolveTheme } from '../core/config';
 import { aggregate, readMarkers } from '../core/state';
+import { readTranscriptMeta } from '../provider/transcript';
 import { renderPresence } from '../core/presence';
 import { DiscordPresence } from './discord';
 
@@ -62,6 +63,11 @@ export async function startDaemon(_args: string[] = []): Promise<void> {
 
     if (state) {
       idleSince = null;
+      // Fill model/branch/tokens from the transcript (hook-provided values win).
+      const meta = readTranscriptMeta(state.transcriptPath);
+      state.model ??= meta.model;
+      state.branch ??= meta.branch;
+      state.tokens ??= meta.tokens;
       await discord.setActivity(renderPresence(theme, state, now));
       writeDaemonStatus({
         pid: process.pid,

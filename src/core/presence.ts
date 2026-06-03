@@ -87,6 +87,12 @@ export function renderPresence(theme: Theme, state: AggregatedState, now: number
 
   if (theme.timer) payload.startTimestamp = state.startedAt;
 
+  // Choose what the compact member-list status shows. Only switch away from the
+  // app name when the target line actually rendered something — otherwise the
+  // compact status would go blank.
+  if (theme.statusDisplay === 'state' && payload.state) payload.statusDisplayType = 1;
+  else if (theme.statusDisplay === 'details' && payload.details) payload.statusDisplayType = 2;
+
   const buttons = theme.buttons
     .map((b) => ({ label: interpolate(b.label, values), url: b.url }))
     .filter((b) => b.label && b.url)

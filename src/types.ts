@@ -12,6 +12,13 @@ export interface ImageSlot {
   text: string;
 }
 
+/**
+ * Which line Discord shows as the compact status (the member-list "Playing …"
+ * slot): the app `name`, the `state` line, or the `details` line. Maps to
+ * Discord's StatusDisplayType.
+ */
+export type StatusDisplay = 'name' | 'state' | 'details';
+
 /** A theme is a bundle of slot templates + which image assets to use. */
 export interface Theme {
   details: string;
@@ -20,6 +27,8 @@ export interface Theme {
   smallImage: ImageSlot;
   timer: boolean;
   buttons: PresenceButton[];
+  /** What the compact member-list status shows. Defaults to `name`. */
+  statusDisplay?: StatusDisplay;
 }
 
 export type ThemeName = 'minimal' | 'developer' | 'focus' | 'playful' | 'custom';
@@ -67,6 +76,7 @@ export interface SessionMarker {
 export interface AggregatedState {
   sessionCount: number;
   startedAt: number; // earliest start across live sessions
+  transcriptPath?: string; // current session's transcript, for daemon enrichment
   project?: string;
   branch?: string;
   model?: string;
@@ -87,4 +97,6 @@ export interface PresencePayload {
   smallImageText?: string;
   startTimestamp?: number;
   buttons?: PresenceButton[];
+  /** Discord StatusDisplayType: 0 name, 1 state, 2 details. Omit for default. */
+  statusDisplayType?: number;
 }

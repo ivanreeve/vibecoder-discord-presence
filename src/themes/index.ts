@@ -26,6 +26,8 @@ export const THEMES: Record<string, Theme> = {
     smallImage: { key: 'status-{state}', text: '{activity}' },
     timer: true,
     buttons: [],
+    // No state line; let the compact status show the activity from details.
+    statusDisplay: 'details',
   },
 
   developer: {
@@ -35,6 +37,7 @@ export const THEMES: Record<string, Theme> = {
     smallImage: { key: 'status-{state}', text: '{activity}' },
     timer: true,
     buttons: [{ label: '⭐ Star on GitHub', url: REPO_URL }],
+    statusDisplay: 'state',
   },
 
   focus: {
@@ -44,6 +47,7 @@ export const THEMES: Record<string, Theme> = {
     smallImage: { key: 'status-focus', text: 'Focusing' },
     timer: true,
     buttons: [],
+    statusDisplay: 'state',
   },
 
   playful: {
@@ -53,6 +57,7 @@ export const THEMES: Record<string, Theme> = {
     smallImage: { key: 'status-{state}', text: '{activity}' },
     timer: true,
     buttons: [{ label: 'get vibecoder', url: REPO_URL }],
+    statusDisplay: 'state',
   },
 };
 

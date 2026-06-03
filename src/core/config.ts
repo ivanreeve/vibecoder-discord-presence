@@ -24,11 +24,11 @@ export const DEFAULT_CONFIG: UserConfig = {
  * Discord application id the presence is published under. The image asset keys
  * the themes reference (`logo`, `status-editing`, …) live on this application.
  *
- * NOTE: placeholder until the shared "vibecoder" Discord application is
- * registered in the Developer Portal. Override per-machine with the
- * VDP_DISCORD_CLIENT_ID env var or a `clientId` field in config.json.
+ * This is the shared "ClaudeCode" application every install publishes under by
+ * default. A client id is a public identifier, not a secret. Override per-machine
+ * with the VDP_DISCORD_CLIENT_ID env var or a `clientId` field in config.json.
  */
-export const DEFAULT_CLIENT_ID = '';
+export const DEFAULT_CLIENT_ID = '1511730102499541123';
 
 function stripBom(s: string): string {
   return s.charCodeAt(0) === 0xfeff ? s.slice(1) : s;

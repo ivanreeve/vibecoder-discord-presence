@@ -16,10 +16,11 @@
  * Hook payload shapes are documented from a live session — see claupit's
  * hooks-findings.md (session_id, cwd, transcript_path, tool_name, tool_input…).
  */
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { basename } from 'node:path';
-import { entryPath, lockPath } from '../core/paths';
+import { entryPath } from '../core/paths';
+import { isProcessAlive, readLock } from '../core/daemon-state';
 import { removeSessionMarker, updateSessionMarker } from '../core/state';
 import type { ActivityState, SessionMarker } from '../types';
 
@@ -106,13 +107,23 @@ function activityFor(event: string, payload: HookPayload): Activity {
   }
 }
 
-/** Spawn the daemon detached if no lock is present. Best-effort, never throws. */
+/**
+ * Spawn the daemon detached unless a live one is already running. Best-effort,
+ * never throws.
+ *
+ * The check is liveness-aware (not just "does the lock file exist"): a stale
+ * lock left by a crashed daemon must NOT block a respawn. If the lock is stale
+ * we still spawn — the daemon's own acquireLock takes the stale lock over
+ * atomically, and if two hooks race here only one daemon wins the lock.
+ */
 function ensureDaemon(): void {
   try {
-    if (existsSync(lockPath())) return;
+    const lock = readLock();
+    if (lock && isProcessAlive(lock.pid)) return; // a live daemon already owns it
     const child = spawn(process.execPath, [entryPath(), 'daemon'], {
       detached: true,
       stdio: 'ignore',
+      windowsHide: true, // don't flash a console window on Windows
     });
     child.unref();
   } catch {
@@ -144,7 +155,10 @@ export async function runHook(args: string[] = []): Promise<void> {
     };
     updateSessionMarker(id, patch, Date.now());
 
-    if (event === 'session-start') ensureDaemon();
+    // Any non-end event means the session is active, so make sure a daemon is
+    // up — this self-heals after idle, a mid-session install, or a daemon crash.
+    // (session-end returned above, so we never resurrect a daemon for a dying one.)
+    ensureDaemon();
   } catch {
     // A broken presence tool must never break Claude Code.
   }

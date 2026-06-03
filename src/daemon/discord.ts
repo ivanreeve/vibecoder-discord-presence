@@ -20,6 +20,7 @@ function toSetActivity(p: PresencePayload): SetActivity {
     smallImageText: p.smallImageText,
     startTimestamp: p.startTimestamp,
     buttons: p.buttons,
+    statusDisplayType: p.statusDisplayType,
   };
 }
 

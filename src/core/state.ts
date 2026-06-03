@@ -105,6 +105,7 @@ export function aggregate(
   return {
     sessionCount: live.length,
     startedAt,
+    transcriptPath: current.transcriptPath,
     project: current.project,
     branch: current.branch,
     model: current.model,
