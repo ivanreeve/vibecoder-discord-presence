@@ -4,6 +4,19 @@
  */
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+/**
+ * Absolute path to our CLI entry (dist/vdp.js) — what we register in hook
+ * commands and spawn for the daemon.
+ *
+ * We resolve it as the sibling `vdp.js` of the current module rather than
+ * `import.meta.url` directly: with code-splitting this module may live in a
+ * hash-named chunk, but the executable entry is always `vdp.js` next to it.
+ */
+export function entryPath(): string {
+  return path.join(path.dirname(fileURLToPath(import.meta.url)), 'vdp.js');
+}
 
 /** Claude Code's config directory (~/.claude unless overridden). */
 export function claudeDir(): string {

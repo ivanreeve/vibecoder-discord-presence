@@ -1,13 +1,12 @@
 /**
  * CLI entry point. Parses argv and routes to a command handler.
  * Contains no business logic itself — just dispatch.
+ *
+ * Handlers are loaded with dynamic import() on purpose: the hot `hook` path
+ * must not pull in the Discord library (only `daemon` does). esbuild defers a
+ * bundled module's evaluation until it's actually imported, so `vdp hook` stays
+ * lean.
  */
-import { install } from './commands/install';
-import { uninstall } from './commands/uninstall';
-import { status } from './commands/status';
-import { runHook } from './provider/claude-code';
-import { startDaemon } from './daemon/index';
-
 const VERSION = '0.1.0';
 
 const HELP = `vdp — vibecoder-discord-presence
@@ -25,15 +24,15 @@ export async function run(argv: string[]): Promise<void> {
 
   switch (command) {
     case 'install':
-      return install(rest);
+      return (await import('./commands/install')).install(rest);
     case 'uninstall':
-      return uninstall(rest);
+      return (await import('./commands/uninstall')).uninstall(rest);
     case 'status':
-      return status(rest);
+      return (await import('./commands/status')).status(rest);
     case 'hook':
-      return runHook(rest);
+      return (await import('./provider/claude-code')).runHook(rest);
     case 'daemon':
-      return startDaemon(rest);
+      return (await import('./daemon/index')).startDaemon(rest);
     case '--version':
     case '-v':
       console.log(VERSION);

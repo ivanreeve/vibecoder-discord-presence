@@ -24,6 +24,20 @@ export interface Theme {
 
 export type ThemeName = 'minimal' | 'developer' | 'focus' | 'playful' | 'custom';
 
+/**
+ * Machine-readable activity keyword. Drives the small-image badge via the
+ * `status-{state}` asset key. `activity` (below) is the human-facing text.
+ */
+export type ActivityState =
+  | 'idle'
+  | 'thinking'
+  | 'editing'
+  | 'running'
+  | 'searching'
+  | 'browsing'
+  | 'delegating'
+  | 'waiting';
+
 /** The user's config file: pick a theme, optionally override slots. */
 export interface UserConfig {
   theme: ThemeName;
@@ -35,10 +49,13 @@ export interface SessionMarker {
   id: string;
   startedAt: number; // epoch ms
   heartbeat: number; // epoch ms
+  cwd?: string;
+  transcriptPath?: string; // side-channel the daemon reads for model/tokens/branch
   project?: string;
   branch?: string;
   model?: string;
-  activity?: string;
+  state?: ActivityState; // machine keyword (badge)
+  activity?: string; // human-facing text
   file?: string;
   tokens?: number;
   cost?: number;
@@ -51,6 +68,7 @@ export interface AggregatedState {
   project?: string;
   branch?: string;
   model?: string;
+  state?: ActivityState;
   activity?: string;
   file?: string;
   tokens?: number;

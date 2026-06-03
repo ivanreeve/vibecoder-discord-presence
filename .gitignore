@@ -1,5 +1,8 @@
 node_modules/
 dist/
+.tmp*/
+.fixtures/
+.probe/
 *.log
 npm-debug.log*
 .DS_Store
