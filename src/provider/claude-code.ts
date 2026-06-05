@@ -31,6 +31,8 @@ interface HookPayload {
   tool_input?: Record<string, unknown>;
   /** SessionStart only: 'startup' | 'resume' | 'clear' | 'compact'. */
   source?: string;
+  /** Notification only: the notification text (permission request vs idle wait). */
+  message?: string;
 }
 
 interface Activity {
@@ -99,7 +101,11 @@ function activityFor(event: string, payload: HookPayload): Activity {
     case 'pre-tool-use':
       return toolActivity(payload);
     case 'notification':
-      return { state: 'waiting', activity: 'Waiting for permission' };
+      // Notification fires both for permission prompts and the 60s idle wait;
+      // only the former is really "waiting for permission".
+      return payload.message?.toLowerCase().includes('permission')
+        ? { state: 'waiting', activity: 'Waiting for permission' }
+        : { state: 'idle', activity: 'Idle' };
     case 'stop':
       return { state: 'idle', activity: 'Idle' };
     default:
