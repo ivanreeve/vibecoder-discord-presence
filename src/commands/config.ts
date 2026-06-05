@@ -178,6 +178,7 @@ export async function config(args: string[] = []): Promise<void> {
         { name: 'developer — project, branch, file, model', value: 'developer' },
         { name: 'focus     — deep-work timer', value: 'focus' },
         { name: 'playful   — vibey', value: 'playful' },
+        { name: 'chaos     — 🚀 every stat, all the emojis, peak vibes', value: 'chaos' },
         { name: 'custom    — start from a base and edit everything', value: 'custom' },
       ],
     });
