@@ -24,7 +24,7 @@ import {
 } from '../core/daemon-state';
 import { configPath } from '../core/paths';
 import { readUserConfig, resolveClientId, resolveTheme } from '../core/config';
-import { aggregate, readMarkers } from '../core/state';
+import { PRUNE_AFTER_MS, aggregate, readMarkers, removeSessionMarker } from '../core/state';
 import { readTranscriptMeta } from '../provider/transcript';
 import { renderPresence } from '../core/presence';
 import { DiscordPresence } from './discord';
@@ -82,7 +82,14 @@ export async function startDaemon(_args: string[] = []): Promise<void> {
   let idleSince: number | null = null;
   while (running) {
     const now = Date.now();
-    const state = aggregate(readMarkers(), now);
+    const markers = readMarkers();
+    const state = aggregate(markers, now);
+
+    // Delete abandoned markers (a session that never fired SessionEnd) so they
+    // don't pile up on disk over time.
+    for (const m of markers) {
+      if (now - m.heartbeat > PRUNE_AFTER_MS) removeSessionMarker(m.id);
+    }
 
     if (state) {
       idleSince = null;

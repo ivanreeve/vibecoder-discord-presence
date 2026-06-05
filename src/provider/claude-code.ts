@@ -29,6 +29,8 @@ interface HookPayload {
   hook_event_name?: string;
   tool_name?: string;
   tool_input?: Record<string, unknown>;
+  /** SessionStart only: 'startup' | 'resume' | 'clear' | 'compact'. */
+  source?: string;
 }
 
 interface Activity {
@@ -132,6 +134,7 @@ export async function runHook(args: string[] = []): Promise<void> {
       return;
     }
 
+    const now = Date.now();
     const cwd = payload.cwd ?? process.cwd();
     const a = activityFor(event, payload);
     const patch: Partial<SessionMarker> = {
@@ -142,7 +145,13 @@ export async function runHook(args: string[] = []): Promise<void> {
       activity: a.activity,
       file: a.file,
     };
-    updateSessionMarker(id, patch, Date.now());
+    // A genuine (re)start resets the elapsed timer so it counts from when you
+    // opened Claude Code — but an auto-compaction is mid-session housekeeping
+    // and must keep the original start time.
+    if (event === 'session-start' && payload.source !== 'compact') {
+      patch.startedAt = now;
+    }
+    updateSessionMarker(id, patch, now);
 
     // Any non-end event means the session is active, so make sure a daemon is
     // up — this self-heals after idle, a mid-session install, or a daemon crash.

@@ -14,8 +14,15 @@ import { join } from 'node:path';
 import { sessionsDir } from './paths';
 import type { AggregatedState, SessionMarker } from '../types';
 
-/** A session is considered dead if its heartbeat is older than this. */
+/** A session is considered dead (excluded from the presence) past this. */
 export const STALE_AFTER_MS = 5 * 60 * 1000;
+
+/**
+ * Past this, a marker is definitively abandoned (no SessionEnd ever fired) and is
+ * deleted from disk so orphans don't accumulate. Well beyond STALE_AFTER_MS so a
+ * briefly-idle-but-live session is never pruned out from under itself.
+ */
+export const PRUNE_AFTER_MS = 60 * 60 * 1000;
 
 function markerPath(id: string): string {
   return join(sessionsDir(), `${id}.json`);

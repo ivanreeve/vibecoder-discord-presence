@@ -32,7 +32,7 @@ export const THEMES: Record<string, Theme> = {
 
   developer: {
     details: 'Coding {project} ({branch})',
-    state: 'Editing {file} · {model}',
+    state: '{activity} {file} · {model}',
     largeImage: { key: 'logo', text: 'Claude Code · {model}' },
     smallImage: { key: 'status-{state}', text: '{activity}' },
     timer: true,
