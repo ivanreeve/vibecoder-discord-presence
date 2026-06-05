@@ -65,8 +65,8 @@ export const THEMES: Record<string, Theme> = {
   // so they never dangle; the sometimes-empty stats ({tokens}/{cost}/{branch})
   // are bare `·` segments that collapse away when absent.
   chaos: {
-    details: '🚀 {activity} — 📂 {project} {branch} 💻✨🔥',
-    state: '{model} · {tokens} · {cost} · 👥 {sessionCount} · ⏱ {elapsed} 🤖💫',
+    details: '🚀 {activity} — 📂 {project} {branch} 💻🔥',
+    state: '{model} · {tokens} · {cost} · 👥 {sessionCount} · ⌛ {elapsed} 🤖💫',
     largeImage: { key: 'logo', text: '✨ locked in · {model} · no thoughts only vibes 🔥' },
     smallImage: { key: 'status-{state}', text: '{activity} fr fr 💯' },
     timer: true,
