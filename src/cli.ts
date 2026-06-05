@@ -7,17 +7,26 @@
  * bundled module's evaluation until it's actually imported, so `vdp hook` stays
  * lean.
  */
+import { ui } from './ui';
+
 const VERSION = '0.1.0';
 
-const HELP = `vdp — vibecoder-discord-presence
-
-Usage:
-  vdp install      Add Claude Code hooks (~/.claude/settings.json)
-  vdp uninstall    Remove hooks and restore settings
-  vdp status       Show install, daemon, and Discord connection state
-  vdp --version    Print version
-  vdp --help       Show this help
-`;
+function helpText(): string {
+  const row = (cmd: string, desc: string): string =>
+    `  ${ui.accent(`vdp ${cmd}`.padEnd(16))} ${ui.dim(desc)}`;
+  return [
+    `${ui.title('vdp')} ${ui.dim('— vibecoder-discord-presence')}`,
+    '',
+    ui.bold('Usage:'),
+    row('install', 'Add Claude Code hooks (~/.claude/settings.json)'),
+    row('uninstall', 'Remove hooks and restore settings'),
+    row('config', 'Customize your Discord presence (interactive)'),
+    row('status', 'Show install, daemon, and Discord connection state'),
+    row('--version', 'Print version'),
+    row('--help', 'Show this help'),
+    '',
+  ].join('\n');
+}
 
 export async function run(argv: string[]): Promise<void> {
   const [command, ...rest] = argv;
@@ -27,6 +36,8 @@ export async function run(argv: string[]): Promise<void> {
       return (await import('./commands/install')).install(rest);
     case 'uninstall':
       return (await import('./commands/uninstall')).uninstall(rest);
+    case 'config':
+      return (await import('./commands/config')).config(rest);
     case 'status':
       return (await import('./commands/status')).status(rest);
     case 'hook':
@@ -40,11 +51,11 @@ export async function run(argv: string[]): Promise<void> {
     case undefined:
     case '--help':
     case '-h':
-      console.log(HELP);
+      console.log(helpText());
       return;
     default:
-      console.error(`Unknown command: ${command}\n`);
-      console.log(HELP);
+      console.error(`${ui.err('Unknown command:')} ${command}\n`);
+      console.log(helpText());
       process.exitCode = 1;
   }
 }

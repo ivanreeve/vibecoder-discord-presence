@@ -18,8 +18,9 @@ import {
   readLock,
 } from '../core/daemon-state';
 import { aggregate, readMarkers } from '../core/state';
+import { ui } from '../ui';
 
-const yes = (b: boolean): string => (b ? '✓' : '✗');
+const mark = (b: boolean): string => (b ? ui.check : ui.cross);
 
 export async function status(_args: string[] = []): Promise<void> {
   // Hooks installed?
@@ -45,27 +46,33 @@ export async function status(_args: string[] = []): Promise<void> {
   const live = aggregate(readMarkers(), now);
   const sessionCount = live?.sessionCount ?? 0;
 
-  console.log('vibecoder-discord-presence — status\n');
+  console.log(`${ui.title('vibecoder-discord-presence')} ${ui.dim('— status')}\n`);
   console.log(
-    `  ${yes(hooksOk)} hooks installed   ${
+    `  ${mark(hooksOk)} hooks installed   ${
       hooksOk
-        ? `(${installed.length}/${HOOK_EVENTS.length})`
-        : `(${installed.length}/${HOOK_EVENTS.length} — run \`vdp install\`)`
+        ? ui.dim(`(${installed.length}/${HOOK_EVENTS.length})`)
+        : ui.warn(`(${installed.length}/${HOOK_EVENTS.length} — run \`vdp install\`)`)
     }`,
   );
   console.log(
-    `  ${yes(clientIdOk)} Discord app id    ${
+    `  ${mark(clientIdOk)} Discord app id    ${
       clientIdOk
-        ? '(configured)'
-        : '(not set — set VDP_DISCORD_CLIENT_ID or clientId in config.json)'
+        ? ui.dim('(configured)')
+        : ui.warn('(not set — set VDP_DISCORD_CLIENT_ID or clientId in config.json)')
     }`,
   );
   console.log(
-    `  ${yes(daemonRunning)} daemon running    ${daemonRunning ? `(pid ${lock?.pid})` : '(not running)'}`,
+    `  ${mark(daemonRunning)} daemon running    ${
+      daemonRunning ? ui.dim(`(pid ${lock?.pid})`) : ui.dim('(not running)')
+    }`,
   );
   console.log(
-    `  ${yes(discordConnected)} Discord connected ${discordConnected ? '' : dsFresh ? '(Discord not reachable)' : '(unknown — daemon idle)'}`,
+    `  ${mark(discordConnected)} Discord connected ${
+      discordConnected
+        ? ''
+        : ui.dim(dsFresh ? '(Discord not reachable)' : '(unknown — daemon idle)')
+    }`,
   );
-  console.log(`  • live sessions     ${sessionCount}`);
-  if (live?.activity) console.log(`  • current activity  ${live.activity}`);
+  console.log(`  ${ui.bullet} live sessions     ${ui.bold(String(sessionCount))}`);
+  if (live?.activity) console.log(`  ${ui.bullet} current activity  ${ui.accent(live.activity)}`);
 }

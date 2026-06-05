@@ -6,14 +6,15 @@
  * they're harmless and let a reinstall keep the user's theme.
  */
 import { readSettings, stripOurHooks, writeSettings } from '../core/settings';
+import { ui } from '../ui';
 
 export async function uninstall(_args: string[] = []): Promise<void> {
   const settings = await readSettings();
   const { cleaned, removed } = stripOurHooks(settings);
   await writeSettings(cleaned);
 
-  console.log('✓ vibecoder-discord-presence uninstalled');
+  console.log(`${ui.check} ${ui.bold('vibecoder-discord-presence uninstalled')}`);
   console.log(
-    `  removed ${removed} hook ${removed === 1 ? 'entry' : 'entries'} from settings.json`,
+    ui.dim(`  removed ${removed} hook ${removed === 1 ? 'entry' : 'entries'} from settings.json`),
   );
 }

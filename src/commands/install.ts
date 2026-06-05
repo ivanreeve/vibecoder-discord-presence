@@ -17,6 +17,7 @@ import {
   readSettings,
   writeSettings,
 } from '../core/settings';
+import { ui } from '../ui';
 
 export async function install(_args: string[] = []): Promise<void> {
   await mkdir(sessionsDir(), { recursive: true });
@@ -31,9 +32,11 @@ export async function install(_args: string[] = []): Promise<void> {
   const backupPath = await backupSettings(existing);
   await writeSettings(mergeHooks(existing, entryPath()));
 
-  console.log('✓ vibecoder-discord-presence installed');
-  console.log(`  hooks: ${HOOK_EVENTS.map((e) => e.name).join(', ')}`);
-  console.log(`  config: ${configPath()}`);
-  if (backupPath) console.log(`  settings backed up to: ${backupPath}`);
-  console.log('\nOpen Claude Code with Discord running and your presence will appear.');
+  console.log(`${ui.check} ${ui.bold('vibecoder-discord-presence installed')}`);
+  console.log(`  ${ui.dim('hooks:')}  ${HOOK_EVENTS.map((e) => e.name).join(', ')}`);
+  console.log(`  ${ui.dim('config:')} ${ui.accent(configPath())}`);
+  if (backupPath) console.log(`  ${ui.dim('backup:')} ${ui.accent(backupPath)}`);
+  console.log(
+    `\n${ui.dim('Open Claude Code with Discord running and your presence will appear.')}`,
+  );
 }

@@ -39,9 +39,10 @@ const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout
 export async function startDaemon(_args: string[] = []): Promise<void> {
   if (!acquireLock(Date.now())) return; // another daemon already owns the lock
 
-  const config = readUserConfig(configPath());
-  const theme = resolveTheme(config);
-  const discord = new DiscordPresence(resolveClientId(config));
+  // The Discord app id is fixed for the connection's lifetime (changing it needs
+  // a reconnect), so resolve it once. The theme, by contrast, is re-read every
+  // tick below so `vdp config` edits apply to the live card without a restart.
+  const discord = new DiscordPresence(resolveClientId(readUserConfig(configPath())));
 
   let running = true;
   const shutdown = async (): Promise<void> => {
@@ -90,6 +91,7 @@ export async function startDaemon(_args: string[] = []): Promise<void> {
       state.model ??= meta.model;
       state.branch ??= meta.branch;
       state.tokens ??= meta.tokens;
+      const theme = resolveTheme(readUserConfig(configPath()));
       await discord.setActivity(renderPresence(theme, state, now));
       writeDaemonStatus({
         pid: process.pid,

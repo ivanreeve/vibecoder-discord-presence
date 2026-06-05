@@ -10,7 +10,9 @@
  * the whole slot, it does not deep-merge individual fields. That keeps the model
  * obvious — a key you set wins outright.
  */
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
+import { configPath } from './paths';
 import { DEFAULT_THEME, THEMES } from '../themes/index';
 import type { Theme, UserConfig } from '../types';
 
@@ -66,6 +68,19 @@ export function resolveClientId(config: UserConfig): string {
 }
 
 /** Convenience: resolve the effective theme straight from a config file path. */
-export function loadConfig(configPath: string): Theme {
-  return resolveTheme(readUserConfig(configPath));
+export function loadConfig(path: string): Theme {
+  return resolveTheme(readUserConfig(path));
+}
+
+/**
+ * Write config.json atomically (temp file + rename). Atomicity matters because
+ * the daemon hot-reads this file every tick — a reader must never see a
+ * half-written file.
+ */
+export function saveUserConfig(config: UserConfig): void {
+  const dest = configPath();
+  mkdirSync(dirname(dest), { recursive: true });
+  const tmp = `${dest}.${process.pid}.tmp`;
+  writeFileSync(tmp, `${JSON.stringify(config, null, 2)}\n`);
+  renameSync(tmp, dest);
 }
