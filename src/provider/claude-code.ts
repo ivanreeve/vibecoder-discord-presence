@@ -17,10 +17,8 @@
  * hooks-findings.md (session_id, cwd, transcript_path, tool_name, tool_input…).
  */
 import { readFileSync } from 'node:fs';
-import { spawn } from 'node:child_process';
 import { basename } from 'node:path';
-import { entryPath } from '../core/paths';
-import { isProcessAlive, readLock } from '../core/daemon-state';
+import { isProcessAlive, readLock, spawnDaemon } from '../core/daemon-state';
 import { removeSessionMarker, updateSessionMarker } from '../core/state';
 import type { ActivityState, SessionMarker } from '../types';
 
@@ -117,18 +115,9 @@ function activityFor(event: string, payload: HookPayload): Activity {
  * atomically, and if two hooks race here only one daemon wins the lock.
  */
 function ensureDaemon(): void {
-  try {
-    const lock = readLock();
-    if (lock && isProcessAlive(lock.pid)) return; // a live daemon already owns it
-    const child = spawn(process.execPath, [entryPath(), 'daemon'], {
-      detached: true,
-      stdio: 'ignore',
-      windowsHide: true, // don't flash a console window on Windows
-    });
-    child.unref();
-  } catch {
-    // daemon spawn is best-effort
-  }
+  const lock = readLock();
+  if (lock && isProcessAlive(lock.pid)) return; // a live daemon already owns it
+  spawnDaemon(); // no lock, or a stale one — the daemon's acquireLock settles races
 }
 
 export async function runHook(args: string[] = []): Promise<void> {

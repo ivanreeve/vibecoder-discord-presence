@@ -19,7 +19,10 @@ function helpText(): string {
     '',
     ui.bold('Usage:'),
     row('install', 'Add Claude Code hooks (~/.claude/settings.json)'),
-    row('uninstall', 'Remove hooks and restore settings'),
+    row('stop', 'Stop the running daemon'),
+    row('restart', 'Restart the daemon'),
+    row('uninstall', 'Remove hooks, stop the daemon, restore settings'),
+    row('uninstall --purge', 'Also delete all vdp data (config, markers)'),
     row('config', 'Customize your Discord presence (interactive)'),
     row('status', 'Show install, daemon, and Discord connection state'),
     row('--version', 'Print version'),
@@ -34,6 +37,10 @@ export async function run(argv: string[]): Promise<void> {
   switch (command) {
     case 'install':
       return (await import('./commands/install')).install(rest);
+    case 'stop':
+      return (await import('./commands/stop')).stop(rest);
+    case 'restart':
+      return (await import('./commands/restart')).restart(rest);
     case 'uninstall':
       return (await import('./commands/uninstall')).uninstall(rest);
     case 'config':

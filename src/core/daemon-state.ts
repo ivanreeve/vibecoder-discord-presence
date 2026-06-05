@@ -10,7 +10,8 @@
  * process.
  */
 import { mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { lockPath, presenceDir, statePath } from './paths';
+import { spawn } from 'node:child_process';
+import { entryPath, lockPath, presenceDir, statePath } from './paths';
 
 export interface LockInfo {
   pid: number;
@@ -116,5 +117,48 @@ export function clearDaemonStatus(): void {
     rmSync(statePath());
   } catch {
     // already gone — fine
+  }
+}
+
+/** Resolve after the pid is gone, or after `timeoutMs`. Returns true if it died. */
+async function waitForExit(pid: number, timeoutMs: number): Promise<boolean> {
+  const step = 100;
+  for (let waited = 0; waited < timeoutMs; waited += step) {
+    if (!isProcessAlive(pid)) return true;
+    await new Promise((r) => setTimeout(r, step));
+  }
+  return !isProcessAlive(pid);
+}
+
+/**
+ * Stop the running daemon, if any. Sends SIGTERM (graceful on POSIX — the daemon
+ * clears its presence and releases its lock; on Windows this terminates it, and
+ * Discord clears the presence when the socket closes). Waits for it to exit so a
+ * follow-up spawn/delete can't race a still-living daemon. Returns the stopped
+ * pid, or null if none was running.
+ */
+export async function stopDaemon(timeoutMs = 2000): Promise<number | null> {
+  const lock = readLock();
+  if (!lock || !isProcessAlive(lock.pid)) return null;
+  try {
+    process.kill(lock.pid, 'SIGTERM');
+  } catch {
+    return null; // already gone, or not ours to signal
+  }
+  await waitForExit(lock.pid, timeoutMs);
+  return lock.pid;
+}
+
+/** Spawn a detached daemon from the built entry. Best-effort, never throws. */
+export function spawnDaemon(): void {
+  try {
+    const child = spawn(process.execPath, [entryPath(), 'daemon'], {
+      detached: true,
+      stdio: 'ignore',
+      windowsHide: true, // don't flash a console window on Windows
+    });
+    child.unref();
+  } catch {
+    // spawn is best-effort
   }
 }

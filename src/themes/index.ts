@@ -60,13 +60,10 @@ export const THEMES: Record<string, Theme> = {
     statusDisplay: 'state',
   },
 
-  // Maximum vibes: every stat, every emoji, peak vibe-coder energy. Emoji sit on
-  // always-present fields ({activity}/{project}/{model}/{sessionCount}/{elapsed})
-  // so they never dangle; the sometimes-empty stats ({tokens}/{cost}/{branch})
-  // are bare `·` segments that collapse away when absent.
   chaos: {
     details: '🚀 {activity} — 📂 {project} {branch} 💻🔥',
-    state: '{model} · {tokens} · {cost} · 👥 {sessionCount} · ⌛ {elapsed} 🤖💫',
+    state:
+      'cooking with {model} · {tokens} tokens burned· {cost} · 👥 {sessionCount} · ⌛ {elapsed}',
     largeImage: { key: 'logo', text: '✨ locked in · {model} · no thoughts only vibes 🔥' },
     smallImage: { key: 'status-{state}', text: '{activity} fr fr 💯' },
     timer: true,
