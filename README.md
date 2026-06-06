@@ -1,77 +1,87 @@
-# vibecoder-discord-presence
+<div align="center">
+  <img src="assets/logo.jpg" alt="" width="160" height="160" align="middle" />
+  <h1>
+    Vibecoder Discord Presence
+  </h1>
+  <p><strong>Your AI coding sessions, live on Discord.</strong></p>
 
-Show your Claude Code activity on your Discord profile as Rich Presence — the
-way Discord shows what you're playing or listening to. Privacy-first by default,
-fully themeable, and it gets out of your way.
+<img src="assets/demo.gif" alt="demo" width="480" />
 
-> Command: `vdp` · Package: `vibecoder-discord-presence`
+</div>
 
-## Status
+A live Discord status for your AI coding sessions — thinking, editing, running
+tests, as it happens. Theme it however you like (or build your own from scratch),
+and it stays private unless you choose to share more.
 
-Early development. The architecture and design are settled (see
-[`docs/superpowers/specs`](docs/superpowers/specs)); modules are being filled in.
+## Supported tools
 
-## Quick start
+| Tool        | Status       |
+| ----------- | ------------ |
+| Claude Code | ✅ supported |
+| Gemini CLI  | 🔜 planned   |
+| Codex       | 🔜 planned   |
+| OpenCode    | 🔜 planned   |
 
-```bash
-npx vibecoder-discord-presence install
+> Built on a provider model — adding a tool only changes how events are read, not
+> the rest. PRs welcome.
+
+## Install
+
+```sh
+npm i -g vibecoder-discord-presence
 ```
 
-That's it. Open Claude Code with the Discord desktop app running and your
-presence appears. Remove it any time with:
+## Setup
 
-```bash
-vdp uninstall
+```sh
+vdp install
 ```
 
-## How it works
+Open your AI coding tool with the Discord **desktop** app running — your status
+shows up on its own. That's the whole setup.
 
-Claude Code hooks write your current activity to a small bridge file. A
-lightweight background daemon holds the Discord connection open, reads that
-file, and updates your presence — appearing only when both Claude Code and
-Discord are running, and disappearing on its own when you're done. No manual
-start/stop.
+> Needs Node 18+ and the Discord desktop app.
 
 ## Themes
 
-Pick a vibe in one line, or tweak/replace it. Default is `minimal`, which leaks
-nothing.
+Five built-ins, from privacy-safe to maximum vibes.
 
-| Theme       | Shows                                              |
-| ----------- | -------------------------------------------------- |
-| `minimal`   | Brand + session timer only (default, privacy-safe) |
-| `developer` | Project, branch, activity, model, token count      |
-| `focus`     | Deep-work timer, hides what you're building        |
-| `playful`   | Personality-forward, emoji copy                    |
+<p align="center">
+  <img src="assets/profile.png" alt="Discord rich presence" width="320"/>
+</p>
 
-Config lives at `~/.claude/discord-presence/config.json`:
+`minimal` · `developer` · `focus` · `playful` · `chaos`
 
-```jsonc
-{
-  "theme": "minimal",
-  "overrides": {
-    // only the fields you want to change
-  },
-}
+## Customize
+
+```sh
+vdp config
 ```
 
-Privacy is simply which placeholders a theme uses — nothing about your work is
-shown unless you opt into it.
-
-## Requirements
-
-- Node.js >= 18 (already required by Claude Code)
-- The Discord **desktop** app (the browser client can't do Rich Presence)
-- Discord setting **"Display current activity as a status message"** enabled
+Pick a theme or build your own — every line, image, and button — with a live
+preview as you go.
 
 ## Commands
 
-| Command         | Does                                                 |
-| --------------- | ---------------------------------------------------- |
-| `vdp install`   | Add the hooks to `~/.claude/settings.json`           |
-| `vdp uninstall` | Remove everything and restore your settings          |
-| `vdp status`    | Show install state, daemon, Discord, active sessions |
+| Command                    | What it does                                   |
+| -------------------------- | ---------------------------------------------- |
+| `vdp install`              | Set it up                                      |
+| `vdp config`               | Customize the card                             |
+| `vdp status`               | See what's running                             |
+| `vdp stop` / `vdp restart` | Control the background process                 |
+| `vdp uninstall [--purge]`  | Remove it (`--purge` also deletes your config) |
+
+## Privacy
+
+The default `minimal` theme shares nothing about your work — no project names,
+paths, or filenames. Anything more is opt-in, and there's no telemetry.
+
+## How it works
+
+A small hook fires on each event and writes a marker file. A lightweight
+background process reads it, updates Discord, and exits once you're idle — no
+always-on daemon, no manual start/stop.
 
 ## License
 
-MIT
+[MIT](LICENSE) © [younesfdj](https://github.com/younesfdj)
