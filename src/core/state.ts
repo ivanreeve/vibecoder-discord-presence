@@ -15,7 +15,7 @@ import { sessionsDir } from './paths';
 import type { AggregatedState, SessionMarker } from '../types';
 
 /** A session is considered dead (excluded from the presence) past this. */
-export const STALE_AFTER_MS = 5 * 60 * 1000;
+export const STALE_AFTER_MS = 20 * 60 * 1000;
 
 /**
  * Past this, a marker is definitively abandoned (no SessionEnd ever fired) and is
