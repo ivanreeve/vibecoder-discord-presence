@@ -44,13 +44,21 @@ shows up on its own. That's the whole setup.
 
 ## Themes
 
-Five built-ins, from privacy-safe to maximum vibes.
+Seven built-ins, from privacy-safe to maximum vibes.
 
 <p align="center">
   <img src="assets/profile.png" alt="Discord rich presence" width="320"/>
 </p>
 
-`minimal` · `developer` · `focus` · `playful` · `chaos`
+| Theme       | Vibe                                                  |
+| ----------- | ----------------------------------------------------- |
+| `minimal`   | Privacy-safe — nothing about your work (default)       |
+| `developer` | Project, branch, file, model                          |
+| `focus`     | Deep-work timer                                        |
+| `playful`   | Vibey and casual                                       |
+| `chaos`     | 🚀 Every stat, all the emojis, peak vibes              |
+| `terminal`  | `>` Retro hacker prompt — privacy-safe, never leaks your project |
+| `shipper`   | 🚢 Momentum & ship-it energy                           |
 
 ## Customize
 
