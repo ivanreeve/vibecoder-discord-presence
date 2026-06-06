@@ -9,7 +9,7 @@
  */
 import { ui } from './ui';
 
-const VERSION = '0.1.0';
+const VERSION = '1.0.0';
 
 function helpText(): string {
   const row = (cmd: string, desc: string): string =>
