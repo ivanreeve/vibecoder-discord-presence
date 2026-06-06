@@ -31,7 +31,15 @@ export interface Theme {
   statusDisplay?: StatusDisplay;
 }
 
-export type ThemeName = 'minimal' | 'developer' | 'focus' | 'playful' | 'chaos' | 'custom';
+export type ThemeName =
+  | 'minimal'
+  | 'developer'
+  | 'focus'
+  | 'playful'
+  | 'chaos'
+  | 'terminal'
+  | 'shipper'
+  | 'custom';
 
 /**
  * Machine-readable activity keyword. Drives the small-image badge via the
