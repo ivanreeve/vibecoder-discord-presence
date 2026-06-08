@@ -17,7 +17,7 @@ import { Separator, confirm, input, select } from '@inquirer/prompts';
 import { configPath } from '../core/paths';
 import { DEFAULT_CONFIG, readUserConfig, resolveTheme, saveUserConfig } from '../core/config';
 import { renderPresence } from '../core/presence';
-import { THEMES } from '../themes/index';
+import { THEMES, THEME_MANIFEST } from '../themes/index';
 import { isProcessAlive, readLock } from '../core/daemon-state';
 import { ui } from '../ui';
 import type { AggregatedState, PresenceButton, StatusDisplay, Theme, UserConfig } from '../types';
@@ -225,17 +225,24 @@ export async function config(args: string[] = []): Promise<void> {
       ),
     );
 
+    // Built-in choices are derived from the theme manifest (single source of
+    // truth); `custom` is appended as the always-available escape hatch.
+    const nameWidth = Math.max(
+      'custom'.length,
+      ...THEME_MANIFEST.map((entry) => entry.name.length),
+    );
+    const themeChoices = [
+      ...THEME_MANIFEST.map((entry) => ({
+        name: `${entry.name.padEnd(nameWidth)} — ${entry.description}`,
+        value: entry.name,
+      })),
+      { name: `${'custom'.padEnd(nameWidth)} — edit every field yourself`, value: 'custom' },
+    ];
+
     const theme = await select({
       message: 'Pick a theme:',
       default: current.theme,
-      choices: [
-        { name: 'minimal   — privacy-safe, nothing about your work', value: 'minimal' },
-        { name: 'developer — project, branch, file, model', value: 'developer' },
-        { name: 'focus     — deep-work timer', value: 'focus' },
-        { name: 'playful   — vibey', value: 'playful' },
-        { name: 'chaos     — 🚀 every stat, all the emojis, peak vibes', value: 'chaos' },
-        { name: 'custom    — edit every field yourself', value: 'custom' },
-      ],
+      choices: themeChoices,
     });
 
     let next: UserConfig;
