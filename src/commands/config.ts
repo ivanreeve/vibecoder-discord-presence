@@ -93,6 +93,10 @@ function row(label: string, value: string): string {
   return `${label.padEnd(28)} ${ui.dim(`[${value}]`)}`;
 }
 
+function editInput(message: string, current: string): Promise<string> {
+  return input({ message, default: current, prefill: 'editable' });
+}
+
 /** Sub-editor for the (up to two) buttons. */
 async function editButtons(currentButtons: PresenceButton[]): Promise<PresenceButton[]> {
   const buttons: PresenceButton[] = [];
@@ -102,13 +106,11 @@ async function editButtons(currentButtons: PresenceButton[]): Promise<PresenceBu
   });
   while (addMore && buttons.length < 2) {
     const i = buttons.length;
-    const label = await input({
-      message: `Button ${i + 1} label:`,
-      default: currentButtons[i]?.label ?? '',
-    });
+    const label = await editInput(`Button ${i + 1} label:`, currentButtons[i]?.label ?? '');
     const url = await input({
       message: `Button ${i + 1} URL:`,
       default: currentButtons[i]?.url ?? '',
+      prefill: 'editable',
       validate: (v) =>
         v.trim() === '' || /^https?:\/\//.test(v.trim()) || 'Must start with http(s)://',
     });
@@ -153,24 +155,24 @@ async function editThemeMenu(start: Theme): Promise<Theme | null> {
       case '__cancel':
         return null;
       case 'details':
-        t.details = await input({ message: 'Details (top line):', default: t.details });
+        t.details = await editInput('Details (top line):', t.details);
         break;
       case 'state':
-        t.state = await input({ message: 'State (second line):', default: t.state });
+        t.state = await editInput('State (second line):', t.state);
         break;
       case 'timer':
         t.timer = await confirm({ message: 'Show the elapsed timer?', default: t.timer });
         break;
       case 'large':
         t.largeImage = {
-          key: await input({ message: 'Large image asset key:', default: t.largeImage.key }),
-          text: await input({ message: 'Large image tooltip:', default: t.largeImage.text }),
+          key: await editInput('Large image asset key:', t.largeImage.key),
+          text: await editInput('Large image tooltip:', t.largeImage.text),
         };
         break;
       case 'small':
         t.smallImage = {
-          key: await input({ message: 'Small badge asset key:', default: t.smallImage.key }),
-          text: await input({ message: 'Small badge tooltip:', default: t.smallImage.text }),
+          key: await editInput('Small badge asset key:', t.smallImage.key),
+          text: await editInput('Small badge tooltip:', t.smallImage.text),
         };
         break;
       case 'status':
