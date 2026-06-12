@@ -29,7 +29,7 @@ export const THEMES: Record<string, Theme> = {
     details: 'Coding with Claude Code',
     state: '',
     largeImage: { key: 'logo', text: 'Claude Code' },
-    smallImage: { key: 'status-{state}', text: '{activity}' },
+    smallImage: { key: '', text: '' },
     timer: true,
     buttons: [],
     // No state line; let the compact status show the activity from details.
@@ -37,10 +37,10 @@ export const THEMES: Record<string, Theme> = {
   },
 
   developer: {
-    details: 'Coding {project} ({branch})',
-    state: '{activity} · {model}',
+    details: 'Coding {project} ({branch} branch)',
+    state: '{activity} </> Using {model}',
     largeImage: { key: 'logo', text: 'Claude Code · {model}' },
-    smallImage: { key: 'status-{state}', text: '{activity}' },
+    smallImage: { key: '', text: '' },
     timer: true,
     buttons: [{ label: '⭐ Star on GitHub', url: REPO_URL }],
     statusDisplay: 'state',
@@ -58,7 +58,7 @@ export const THEMES: Record<string, Theme> = {
 
   playful: {
     details: '🤖 vibecoding with Claude',
-    state: 'shipping {project} · {model}',
+    state: 'shipping {project} · Using {model}',
     largeImage: { key: 'logo', text: 'vibecoder' },
     smallImage: { key: 'status-{state}', text: '{activity}' },
     timer: true,
@@ -129,6 +129,6 @@ export const THEME_MANIFEST: readonly ThemeManifestEntry[] = [
   { name: 'focus', description: 'deep-work timer' },
   { name: 'playful', description: 'vibey' },
   { name: 'chaos', description: '🚀 every stat, all the emojis, peak vibes' },
-  { name: 'terminal', description: '> retro hacker prompt, privacy-safe' },
+  { name: 'terminal', description: '>_ retro hacker prompt, privacy-safe' },
   { name: 'shipper', description: '🚢 momentum & ship-it energy' },
 ];

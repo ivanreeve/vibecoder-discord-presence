@@ -179,6 +179,7 @@ async function editThemeMenu(start: Theme): Promise<Theme | null> {
         t.statusDisplay = (await select({
           message: 'Compact member-list status shows:',
           default: t.statusDisplay ?? 'name',
+          loop: false,
           choices: [
             { name: 'App name ("Playing ClaudeCode")', value: 'name' },
             { name: 'The state line (your activity)', value: 'state' },
@@ -244,6 +245,7 @@ export async function config(args: string[] = []): Promise<void> {
     const theme = await select({
       message: 'Pick a theme:',
       default: current.theme,
+      loop: false,
       choices: themeChoices,
     });
 
@@ -260,6 +262,7 @@ export async function config(args: string[] = []): Promise<void> {
       console.log(`\n${previewCard(THEMES[theme]!)}\n`);
       const action = await select({
         message: `Use "${theme}" as-is, or customize it?`,
+        loop: false,
         choices: [
           { name: `Use ${theme} as-is`, value: 'asis' },
           { name: 'Customize — edit fields, then save', value: 'edit' },
