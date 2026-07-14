@@ -38,6 +38,10 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
 
 function toSetActivity(p: PresencePayload): SetActivity {
   return {
+    // Without an explicit name Discord falls back to the RPC application's own
+    // registered name, which is what `statusDisplay: 'name'` (StatusDisplayType
+    // 0) then surfaces in the compact member-list status.
+    name: 'Claude Code',
     details: p.details,
     state: p.state,
     largeImageKey: p.largeImageKey,
