@@ -27,20 +27,37 @@ and it stays private unless you choose to share more.
 
 ## Install
 
+**One-line setup** — clones this fork, builds it, registers the Claude Code
+hooks, and installs the dynamic `developer` preset (a live readout of the model
+and reasoning effort you're actually running):
+
+**macOS / Linux**
+
 ```sh
-npm i -g vibecoder-discord-presence
+curl -fsSL https://raw.githubusercontent.com/ivanreeve/vibecoder-discord-presence/master/setup.sh | bash
 ```
 
-## Setup
+**Windows (PowerShell)**
+
+```powershell
+irm https://raw.githubusercontent.com/ivanreeve/vibecoder-discord-presence/master/setup.ps1 | iex
+```
+
+Open Claude Code with the Discord **desktop** app running — your status shows up
+on its own. That's the whole setup. Safe to re-run; it backs up any existing
+config first.
+
+> Needs Node 18+, git, and the Discord desktop app.
+
+<details>
+<summary>Prefer to install the published package by hand?</summary>
 
 ```sh
+npm i -g vibecoder-discord-presence
 vdp install
 ```
 
-Open your AI coding tool with the Discord **desktop** app running — your status
-shows up on its own. That's the whole setup.
-
-> Needs Node 18+ and the Discord desktop app.
+</details>
 
 ## Themes
 
@@ -68,6 +85,12 @@ vdp config
 
 Pick a theme or build your own — every line, image, and button — with a live
 preview as you go.
+
+Available placeholders:
+`{project}` `{branch}` `{model}` `{effort}` `{activity}` `{file}` `{tokens}`
+`{cost}` `{elapsed}` `{sessionCount}` `{state}`. `{model}` and `{effort}` track
+the live Claude Code model (e.g. `Opus 4.8`) and reasoning effort (e.g. `Max`);
+each collapses to nothing when it isn't available.
 
 ## Commands
 
