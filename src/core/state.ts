@@ -116,6 +116,7 @@ export function aggregate(
     project: current.project,
     branch: current.branch,
     model: current.model,
+    effort: current.effort,
     state: current.state,
     activity: current.activity,
     file: current.file,

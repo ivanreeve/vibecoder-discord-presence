@@ -73,6 +73,7 @@ export interface SessionMarker {
   project?: string;
   branch?: string;
   model?: string;
+  effort?: string; // reasoning effort (low|medium|high|xhigh|max), from $CLAUDE_EFFORT at hook time
   state?: ActivityState; // machine keyword (badge)
   activity?: string; // human-facing text
   file?: string;
@@ -88,6 +89,7 @@ export interface AggregatedState {
   project?: string;
   branch?: string;
   model?: string;
+  effort?: string;
   state?: ActivityState;
   activity?: string;
   file?: string;

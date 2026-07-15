@@ -30,12 +30,26 @@ interface CacheEntry {
 
 const cache = new Map<string, CacheEntry>();
 
-/** Turn a raw model id (`claude-opus-4-8`) into a friendly label (`Opus 4.8`). */
-function prettyModel(raw: string): string {
-  const m = /claude-(opus|sonnet|haiku)-(\d+)-(\d+)/.exec(raw);
+/**
+ * Turn a raw model id into a friendly label:
+ *   `claude-opus-4-8`             -> `Opus 4.8`
+ *   `claude-fable-5`              -> `Fable 5`
+ *   `claude-sonnet-5`            -> `Sonnet 5`
+ *   `claude-haiku-4-5-20251001`   -> `Haiku 4.5`  (trailing date stamp dropped)
+ *   `claude-fable-5[1m]`          -> `Fable 5`     (Claude Code variant tag dropped)
+ *
+ * Tiers span opus/sonnet/haiku/fable and the version may be one part (`5`) or
+ * two (`4.8`). An id we don't recognize is passed through unchanged.
+ *
+ * Exported for unit tests.
+ */
+export function prettyModel(raw: string): string {
+  const id = raw.replace(/\[[^\]]*\]/g, '').trim(); // drop "[1m]" and similar variant tags
+  const m = /claude-(opus|sonnet|haiku|fable)-(\d+)(?:-(\d+))?/.exec(id);
   if (!m) return raw;
   const tier = m[1]!.charAt(0).toUpperCase() + m[1]!.slice(1);
-  return `${tier} ${m[2]}.${m[3]}`;
+  const version = m[3] ? `${m[2]}.${m[3]}` : m[2]!;
+  return `${tier} ${version}`;
 }
 
 interface TranscriptLine {

@@ -143,6 +143,11 @@ export async function runHook(args: string[] = []): Promise<void> {
     const now = Date.now();
     const cwd = payload.cwd ?? process.cwd();
     const a = activityFor(event, payload);
+    // Reasoning effort isn't in the hook's stdin payload, but Claude Code exports
+    // it to hook child processes as $CLAUDE_EFFORT (low|medium|high|xhigh|max).
+    // Each hook fires in a fresh process, so reading it here tracks mid-session
+    // `/effort` changes; the daemon just renders whatever the latest marker holds.
+    const effort = process.env.CLAUDE_EFFORT?.trim().toLowerCase() || undefined;
     const patch: Partial<SessionMarker> = {
       cwd,
       project: basename(cwd),
@@ -150,6 +155,7 @@ export async function runHook(args: string[] = []): Promise<void> {
       state: a.state,
       activity: a.activity,
       file: a.file,
+      effort,
     };
     // A genuine (re)start resets the elapsed timer so it counts from when you
     // opened Claude Code — but an auto-compaction is mid-session housekeeping

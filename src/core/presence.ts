@@ -26,11 +26,27 @@ function formatTokens(n: number): string {
   return String(n);
 }
 
+/**
+ * Present a raw reasoning-effort keyword as a compact label: `high` -> `High`,
+ * `xhigh` -> `Extra High`, `max` -> `Max`. An unknown value is capitalized as-is.
+ */
+function prettyEffort(raw: string): string {
+  const labels: Record<string, string> = {
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    xhigh: 'Extra High',
+    max: 'Max',
+  };
+  return labels[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
 function buildValues(state: AggregatedState, now: number): Values {
   return {
     project: state.project ?? '',
     branch: state.branch ?? '',
     model: state.model ?? '',
+    effort: state.effort ? prettyEffort(state.effort) : '',
     activity: state.activity ?? '',
     file: state.file ?? '',
     tokens: state.tokens != null ? formatTokens(state.tokens) : '',

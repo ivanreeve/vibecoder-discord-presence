@@ -5,8 +5,11 @@
  * Every string is a template; available placeholders are filled from the
  * aggregated session state:
  *
- *   {project} {branch} {model} {activity} {file} {tokens} {cost}
+ *   {project} {branch} {model} {effort} {activity} {file} {tokens} {cost}
  *   {elapsed} {sessionCount} {state}
+ *
+ * {model} is the live Claude Code model (e.g. `Opus 4.8`) and {effort} the live
+ * reasoning effort (e.g. `Max`); both collapse to nothing when unavailable.
  *
  * Empty placeholders collapse gracefully (no "Coding " with a trailing blank).
  * Privacy is simply a function of which placeholders a theme uses — the safe
@@ -38,8 +41,8 @@ export const THEMES: Record<string, Theme> = {
 
   developer: {
     details: 'Coding {project} ({branch} branch)',
-    state: '{activity} </> Using {model}',
-    largeImage: { key: 'logo', text: 'Claude Code · {model}' },
+    state: '{activity} </> Using {model} ({effort})',
+    largeImage: { key: 'logo', text: 'Claude Code · {model} ({effort})' },
     smallImage: { key: '', text: '' },
     timer: true,
     buttons: [{ label: '⭐ Star on GitHub', url: REPO_URL }],

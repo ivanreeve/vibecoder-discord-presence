@@ -15,6 +15,7 @@ function richState(): AggregatedState {
     project: 'my-app',
     branch: 'feat/theme-pack',
     model: 'Opus 4.8',
+    effort: 'high',
     state: 'editing',
     activity: 'Editing index.ts',
     file: 'index.ts',
@@ -131,4 +132,31 @@ test('terminal theme is privacy-safe: never leaks project, branch, or file', () 
 test('renderPresence resolves status-{state} badge to a concrete key', () => {
   const p = renderPresence(THEMES.terminal!, { ...richState(), state: 'thinking' }, NOW);
   assert.equal(p.smallImageKey, 'status-thinking');
+});
+
+test('developer theme surfaces {model} and {effort}, collapsing effort when absent', () => {
+  const shown = renderPresence(THEMES.developer!, richState(), NOW);
+  assert.ok(shown.state?.includes('Opus 4.8'), 'state line shows the model');
+  assert.ok(shown.state?.includes('(High)'), 'state line shows the effort label');
+  assert.ok(shown.largeImageText?.includes('(High)'), 'tooltip shows the effort label');
+
+  // A model with no effort (or effort unset) must not leave dangling "()".
+  const noEffort = renderPresence(THEMES.developer!, { ...richState(), effort: undefined }, NOW);
+  assert.ok(noEffort.state?.includes('Opus 4.8'), 'still shows the model without effort');
+  assert.ok(!noEffort.state?.includes('()'), 'empty effort parens collapse in the state line');
+  assert.ok(!(noEffort.largeImageText ?? '').includes('()'), 'empty effort parens collapse in the tooltip');
+});
+
+test('effort keywords render as compact labels', () => {
+  const render = (effort: string): string =>
+    renderPresence(
+      { ...THEMES.developer!, state: '{effort}', largeImage: { key: 'logo', text: '' } },
+      { ...richState(), effort },
+      NOW,
+    ).state ?? '';
+  assert.equal(render('low'), 'Low');
+  assert.equal(render('medium'), 'Medium');
+  assert.equal(render('high'), 'High');
+  assert.equal(render('xhigh'), 'Extra High');
+  assert.equal(render('max'), 'Max');
 });
