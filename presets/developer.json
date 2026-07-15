@@ -1,7 +1,7 @@
 {
   "theme": "developer",
   "overrides": {
-    "details": "Coding on {branch} branch",
+    "details": "Working on {project}({branch})",
     "state": "{activity} · Using {model} ({effort})",
     "largeImage": { "key": "logo", "text": "Claude Code · {model} ({effort})" },
     "statusDisplay": "name"
